@@ -1,0 +1,127 @@
+Michael likes snowboarding. That’s not very surprising, since snowboarding is really great. The bad
+thing is that in order to gain speed, the area must slide downwards. Another disadvantage is that when
+you’ve reached the bottom of the hill you have to walk up again or wait for the ski-lift.
+Michael would like to know how long the longest run in an area is. That area is given by a grid of
+numbers, defining the heights at those points. Look at this example:
+1 2 3 4 5
+16 17 18 19 6
+15 24 25 20 7
+14 23 22 21 8
+13 12 11 10 9
+One can slide down from one point to a connected other one if and only if the height decreases. One
+point is connected to another if it’s at left, at right, above or below it. In the sample map, a possible
+slide would be 24-17-16-1 (start at 24, end at 1). Of course if you would go 25-24-23-. . . -3-2-1, it would
+be a much longer run. In fact, it’s the longest possible.
+
+Input
+The first line contains the number of test cases N. Each test case starts with a line containing the
+name (it’s a single string), the number of rows R and the number of columns C. After that follow R
+lines with C numbers each, defining the heights. R and C won’t be bigger than 100, N not bigger than
+15 and the heights are always in the range from 0 to 100.
+Output
+For each test case, print a line containing the name of the area, a colon, a space and the length of the
+longest run one can slide down in that area.
+
+Sample Input
+2
+Feldberg 10 5
+56 14 51 58 88
+26 94 24 39 41
+24 16 8 51 51
+76 72 77 43 10
+38 50 59 84 81
+5 23 37 71 77
+96 10 93 53 82
+94 15 96 69 9
+74 0 62 38 96
+37 54 55 82 38
+Spiral 5 5
+1 2 3 4 5
+16 17 18 19 6
+15 24 25 20 7
+14 23 22 21 8
+13 12 11 10 9
+
+Sample Output
+
+Feldberg: 7
+Spiral: 25
+
+
+--------------------------------------------------
+
+Fairly simple problem. Slightly hard to implement.
+
+Okay ... So, the maximum length of a path starting from (i, j)
+
+= 1 + max(starting from eligible neighbour)
+
+To be an eleigible neighbour, the entry has to be either top, bottom, left or right and must be smaller than M(i, j).
+
+Use memoisation to get past this problem because when we call upon previous problems, it's not neccesary they are already solved.
+
+(For example, when (i, j) calls (i + 1, j).)
+
+I did this by passing a 2D vector to a function. It could also be done by having global arrays.
+
+I avoid global variables whenever possible.
+
+Initially everything is initalised to -1. (except the elements at row 0, column 0 and row n+1, column n+1). The matrix is padded up with 0s to avoid boundary checking.
+
+A mistake I made was to ensure that once an element is visited, it's maximum path is 1 (and not -1 if it has no eligible neighbours).
+
+------------------------------------------------------
+
+int find_maximum_from(int row, int column, vector <v_int> &matrix, vector <v_int> &maximum_from)
+{
+    if(maximum_from[row][column] == -1)
+    {
+        maximum_from[row][column] = 1;
+
+        if(matrix[row][column] > matrix[row - 1][column])
+            maximum_from[row][column] = max(maximum_from[row][column], 1 + find_maximum_from(row - 1, column, matrix, maximum_from) );
+
+        if(matrix[row][column] > matrix[row][column - 1])
+            maximum_from[row][column] = max(maximum_from[row][column], 1 + find_maximum_from(row, column - 1, matrix, maximum_from) );
+
+        if(matrix[row][column] > matrix[row][column + 1])
+            maximum_from[row][column] = max(maximum_from[row][column], 1 + find_maximum_from(row, column + 1, matrix, maximum_from) );
+
+        if(matrix[row][column] > matrix[row + 1][column])
+            maximum_from[row][column] = max(maximum_from[row][column], 1 + find_maximum_from(row + 1, column, matrix, maximum_from) );
+    }
+    return maximum_from[row][column];
+}
+
+void solve()
+{
+    char name[MAX_SIZE];
+    int no_of_rows, no_of_columns;
+    scanf("%s %d %d", name, &no_of_rows, &no_of_columns);
+
+    vector <v_int> matrix(no_of_rows + 2, v_int(no_of_columns + 2, 0));
+    vector <v_int> maximum_from(no_of_rows + 2, v_int(no_of_columns + 2, 0));
+
+    for(int i = 1; i <= no_of_rows; i++)
+    {
+        for(int j = 1; j <= no_of_columns; j++)
+        {
+            scanf("%d", &matrix[i][j]);
+            maximum_from[i][j] = -1;
+        }
+    }
+
+    int longest_run = 0;
+    for(int i = 1; i <= no_of_rows; i++)
+    {
+        for(int j = 1; j <= no_of_columns; j++)
+        {
+            longest_run = max(longest_run, find_maximum_from(i, j, matrix, maximum_from));
+        }
+    }
+
+    printf("%s: %d\n",name, longest_run);
+}
+
+
+
