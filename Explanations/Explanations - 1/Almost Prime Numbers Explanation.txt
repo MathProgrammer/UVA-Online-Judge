@@ -1,0 +1,85 @@
+
+Almost prime numbers are the non-prime numbers which are divisible by only a single prime number.
+In this problem your job is to write a program which finds out the number of almost prime numbers
+within a certain range.
+
+---------------------------------------------
+
+If a number is a multiple of only one prime, then it means it is a power of a prime.
+Notice that if you want all numbers which are powers of primes till 1e12,  you only need primes till 1e6.
+
+Because if p > 1e6, p^2 > 1e12.
+
+Do a sieve and find all primes up to 1e6. For each prime, store all it's powers less than 1e12 in a list.
+
+This number will not be too big. (Turns out to be about 80 thousand).
+
+Sort this list of prime powers.
+
+After sorting, perform binary search for L and R.
+
+Lower bound returns an iterator to the first element that is not >= L.
+
+Lower bound(L) gives the expected answer.
+Lower bound(R) gives us the expected answer if R is not on the list. If R is on the list, then lower bound(R) returns an iterator to the element before R.
+
+Answer = Lower bound(R) + (binarysearch(R)?) - Lower bound(L)
+
+The binary search functions lower and upper bound return iterators. So, be sure to subtract v.begin from them.
+
+--------------------------------------
+
+void precompute(vector <long long> &prime_powers)
+{
+    const int LIMIT = 1e6;
+
+    vector <int> is_prime(LIMIT + 1, true);
+    is_prime[0] = is_prime[1] = false;
+
+    for(int i = 2; i < LIMIT; i++)
+    {
+        if(is_prime[i])
+        {
+            for(long long multiple = i*1LL*i; multiple < LIMIT; multiple += i)
+                is_prime[multiple] = false;
+
+
+            long long prime_power = i*1LL*i;
+            while(prime_power <= LIMIT*1LL*LIMIT)
+            {
+                prime_powers.push_back(prime_power);
+                prime_power *= i;
+            }
+        }
+    }
+}
+
+---------------------------------------------------
+
+int main()
+{
+    vector <long long> prime_powers;
+    precompute(prime_powers);
+    sort(all(prime_powers));
+
+    int no_of_queries;
+    scanf("%d", &no_of_queries);
+
+    while(no_of_queries--)
+    {
+        long long left, right;
+        scanf("%lld %lld", &left, &right);
+
+        int elements_before_range = lower_bound(all(prime_powers), left) - prime_powers.begin();
+
+        int elements_including_range = lower_bound(all(prime_powers), right) - prime_powers.begin();
+        elements_including_range += binary_search(all(prime_powers), right);
+
+        printf("%d\n", elements_including_range - elements_before_range);
+    }
+
+    return 0;
+}
+
+
+
