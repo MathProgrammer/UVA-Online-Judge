@@ -1,0 +1,89 @@
+Larry now lost most of his knowledge after
+spending a few years on deserted islands all over
+the place. When Ryan brought up the fact that
+every even number greater than 3 can represented
+as the sum of two prime numbers, he
+couldn’t believe it! So now Larry is trying to
+come up with some kind of counterexample, and
+you can help him!
+
+Input
+Each line will contain an integer N greater than
+3. The input will terminate when N is 0. N will
+not be bigger than 1 million.
+
+Output
+For each test case, output one way of summing two prime numbers. If there are more than one set of
+sums for which this is true, choose the set of sum the maximizes the difference between them. See the
+sample output. If a number cannot be represented as the sum of two prime number, print “NO WAY!”
+as below.
+Note: 10 can be 3+7 or 5+5, and since 7-3 is bigger than 5-5, we choose 3+7.
+
+Sample Input
+4
+5
+6
+7
+9
+10
+11
+0
+
+Sample Output
+4:
+2+2
+5:
+2+3
+6:
+3+3
+7:
+2+5
+9:
+2+7
+10:
+3+7
+11:
+NO WAY!
+
+-----------------------------------------------------
+
+Precompute the list of all primes. Start from the smallest prime and go upwards till n-p is also a prime.
+
+----------------------------------------------------
+
+int main()
+{
+    const int LIMIT = 1e6 + 1;
+    vector <int> prime;
+    vector <int> is_prime(LIMIT, true);
+    precompute(prime, is_prime, LIMIT);
+
+    while(true)
+    {
+        int n;
+        scanf("%d", &n);
+
+        if(n == 0) break;
+
+        printf("%d:\n", n);
+
+        int summand_1 = 0, summand_2 = 0;
+
+        for(unsigned int i = 0; i < prime.size() && prime[i] <= n; i++)
+        {
+            if(is_prime[n - prime[i]])
+            {
+                summand_1 = prime[i];
+                summand_2 = n - prime[i];
+                break;
+            }
+        }
+
+        if(summand_1 + summand_2 == n)
+            printf("%d+%d\n", summand_1, summand_2);
+        else
+            printf("NO WAY!\n");
+    }
+
+    return 0;
+}
